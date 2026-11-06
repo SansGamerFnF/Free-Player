@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <application
+        android:allowBackup="true"
+        android:icon="@mipmap/ic_launcher"
+        android:label="@string/app_name"
+        android:roundIcon="@mipmap/ic_launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme">
+
+        <activity
+            android:configChanges="orientation|keyboardHidden|keyboard|screenSize|locale|smallestScreenSize|screenLayout|uiMode|navigation|density"
+            android:name=".MainActivity"
+            android:label="@string/title_activity_main"
+            android:theme="@style/AppTheme.NoActionBarLaunch"
+            android:launchMode="singleTask"
+            android:exported="true">
+
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+
+        </activity>
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.fileprovider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths"></meta-data>
+        </provider>
+
+        <!-- Servicio en primer plano de MediaBridge: mantiene viva la
+             reproducción de la web y publica la notificación de reproductor.
+             foregroundServiceType="mediaPlayback" es obligatorio en Android 14
+             (y exige el permiso FOREGROUND_SERVICE_MEDIA_PLAYBACK de abajo).
+             stopWithTask="false" es CLAVE: al cerrar la app (swipe de tareas)
+             el servicio NO se mata, así que la música y la notificación siguen
+             vivas; solo hide() de la web lo detiene. -->
+        <service
+            android:name=".PlaybackService"
+            android:exported="false"
+            android:stopWithTask="false"
+            android:foregroundServiceType="mediaPlayback" />
+
+        <!-- Botones de la notificación (y descarte) → acción a la web -->
+        <receiver
+            android:name=".MediaActionReceiver"
+            android:exported="false" />
+
+        <!-- Widget de la pantalla de inicio (el sistema envía APPWIDGET_UPDATE) -->
+        <receiver
+            android:name=".PlayerWidgetProvider"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/freeplayer_widget_info" />
+        </receiver>
+    </application>
+
+    <!-- Permissions -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!-- Escaneo total de música: Android 13 (API 33) en adelante -->
+    <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <!-- Android 12 (API 32) y anteriores -->
+    <uses-permission
+        android:name="android.permission.READ_EXTERNAL_STORAGE"
+        android:maxSdkVersion="32" />
+
+    <!-- MediaBridge: notificación en primer plano (exigido en Android 14+) -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
+    <!-- Android 13 (API 33) en adelante: permiso en tiempo de ejecución -->
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+    <!-- CPU despierta mientras suena el audio del WebView -->
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+</manifest>

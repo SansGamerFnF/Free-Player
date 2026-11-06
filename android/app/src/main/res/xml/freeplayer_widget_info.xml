@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Configuración del widget de Free Player (horizontal, 4x2).
+     updatePeriodMillis = 0: el widget NO se sondea; solo se actualiza cuando
+     la web llama a MediaBridge.update()/hide() (el nativo empuja los cambios).
+     Con 4 celdas de ancho y 2 de alto la carátula ocupa todo el fondo y
+     caben bien el título, el artista y los 3 botones. -->
+<appwidget-provider xmlns:android="http://schemas.android.com/apk/res/android"
+    android:description="@string/fp_widget_description"
+    android:initialLayout="@layout/freeplayer_widget"
+    android:minHeight="120dp"
+    android:minWidth="250dp"
+    android:previewLayout="@layout/freeplayer_widget"
+    android:resizeMode="horizontal"
+    android:targetCellHeight="2"
+    android:targetCellWidth="4"
+    android:updatePeriodMillis="0"
+    android:widgetCategory="home_screen" />

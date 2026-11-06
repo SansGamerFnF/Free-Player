@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#0f0f10" />
+  <title>Free Player</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="icons/icon-192.png" type="image/png" />
+  <link rel="apple-touch-icon" href="icons/icon-192.png" />
+  <link rel="stylesheet" href="css/style.css" />
+  <script>
+    // En las pruebas automáticas no se muestra la pantalla de apertura
+    if (/[?&](selftest|fmt|art|seed)=1/.test(location.search)) {
+      document.documentElement.classList.add('no-splash');
+    }
+  </script>
+</head>
+<body data-theme="auto">
+
+  <!-- ====== PANTALLA DE APERTURA ====== -->
+  <div class="splash" id="splash" aria-hidden="true">
+    <div class="splash-inner">
+      <img class="splash-icon" src="icons/icon-192.png" alt="" />
+      <div class="splash-name">Free Player</div>
+      <div class="splash-sub">Versión 0.3-c (beta)</div>
+      <div class="splash-bar"><i></i></div>
+    </div>
+  </div>
+
+  <!-- ====== ENCABEZADO ====== -->
+  <header class="app-header">
+    <h1 class="brand">Free&nbsp;Player</h1>
+    <div class="header-actions">
+      <button id="btn-search" class="icon-btn" aria-label="Buscar" title="Buscar">
+        <svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/></svg>
+      </button>
+      <button id="btn-theme" class="icon-btn" aria-label="Cambiar tema" title="Tema">
+        <svg viewBox="0 0 24 24" class="ico-sun"><circle cx="12" cy="12" r="4.5"/><line x1="12" y1="2" x2="12" y2="4.5"/><line x1="12" y1="19.5" x2="12" y2="22"/><line x1="2" y1="12" x2="4.5" y2="12"/><line x1="19.5" y1="12" x2="22" y2="12"/><line x1="4.9" y1="4.9" x2="6.7" y2="6.7"/><line x1="17.3" y1="17.3" x2="19.1" y2="19.1"/><line x1="4.9" y1="19.1" x2="6.7" y2="17.3"/><line x1="17.3" y1="6.7" x2="19.1" y2="4.9"/></svg>
+        <svg viewBox="0 0 24 24" class="ico-moon"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <button id="btn-scan" class="icon-btn" aria-label="Escanear el teléfono" title="Escanear todas las canciones">
+        <svg viewBox="0 0 24 24"><path d="M3 7V5a2 2 0 0 1 2-2h2"/><path d="M17 3h2a2 2 0 0 1 2 2v2"/><path d="M21 17v2a2 2 0 0 1-2 2h-2"/><path d="M7 21H5a2 2 0 0 1-2-2v-2"/><circle cx="12" cy="12" r="3.2"/></svg>
+      </button>
+      <button id="btn-settings" class="icon-btn" aria-label="Menú de ajustes" title="Menú">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="12" r="1.7" fill="currentColor" stroke="none"/><circle cx="12" cy="19" r="1.7" fill="currentColor" stroke="none"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ====== MENÚ SUPERIOR (donde antes estaba el botón +) ====== -->
+  <div class="pop-backdrop" id="top-menu-backdrop" hidden></div>
+  <div class="pop-menu" id="top-menu" hidden>
+    <button data-top="add">＋ Añadir música</button>
+    <button data-top="colors">🎨 Color del tema</button>
+    <button data-top="mode">🌓 Tema</button>
+    <button data-top="settings">⚙ Ajustes</button>
+  </div>
+
+  <!-- ====== BUSQUEDA ====== -->
+  <div class="search-bar" id="search-bar" hidden>
+    <input type="search" id="search-input" placeholder="Buscar canciones, artistas o álbumes…" autocomplete="off" />
+    <button class="icon-btn" id="btn-search-close" aria-label="Cerrar búsqueda">
+      <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+    </button>
+  </div>
+
+  <!-- ====== ZONA DE CONTENIDO ====== -->
+  <main class="content" id="content">
+
+    <!-- Biblioteca -->
+    <section class="panel active" id="panel-library">
+      <div class="list-head">
+        <span class="count" id="lib-count">0 canciones</span>
+        <div class="head-actions">
+          <button class="btn small" id="btn-view-folders" aria-pressed="false">📁 Carpetas</button>
+          <div class="sort">
+            <label for="sort-select">Orden:</label>
+          <select id="sort-select">
+            <option value="title">Título</option>
+            <option value="artist">Artista</option>
+            <option value="album">Álbum</option>
+            <option value="modified">Modificación</option>
+          </select>
+          <button class="btn small sort-dir" id="sort-dir" aria-label="Orden ascendente" title="Ascendente">↑</button>
+          </div>
+        </div>
+      </div>
+      <ul class="track-list" id="library-list"></ul>
+      <div class="empty" id="library-empty">
+        <svg viewBox="0 0 24 24" class="empty-ico"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+        <p>Tu biblioteca está vacía</p>
+        <p class="muted small" id="formats-hint"></p>
+        <div class="empty-actions">
+          <button class="btn primary" id="btn-empty-add">Añadir música</button>
+          <button class="btn ghost" id="btn-empty-scan">📱 Escanear el teléfono</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- Favoritos -->
+    <section class="panel" id="panel-favorites">
+      <div class="list-head">
+        <span class="count" id="fav-count">0 favoritas</span>
+      </div>
+      <ul class="track-list" id="favorites-list"></ul>
+      <div class="empty" id="favorites-empty">
+        <svg viewBox="0 0 24 24" class="empty-ico"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <p>Aún no tienes favoritas</p>
+        <p class="muted small">Abre el reproductor a pantalla completa y toca el corazón ❤</p>
+      </div>
+    </section>
+
+    <!-- Playlists -->
+    <section class="panel" id="panel-playlists">
+      <div class="list-head">
+        <span class="count" id="pl-count">0 playlists</span>
+        <button class="btn small" id="btn-new-playlist">+ Nueva playlist</button>
+      </div>
+      <ul class="playlist-list" id="playlist-list"></ul>
+      <!-- Detalle de la playlist: se pinta aquí (fuera del <ul>) para que
+           el navegador no cierre la lista al anidar otra dentro. -->
+      <div id="playlist-detail" hidden></div>
+      <div class="empty" id="playlists-empty">
+        <svg viewBox="0 0 24 24" class="empty-ico"><line x1="4" y1="7" x2="16" y2="7"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="12" y2="17"/><circle cx="18" cy="16" r="3"/><path d="M21 16V7l-3 1"/></svg>
+        <p>Crea tu primera playlist</p>
+        <button class="btn primary" id="btn-empty-new-playlist">+ Nueva playlist</button>
+      </div>
+      <div class="drop-hint" id="playlist-drop-hint">Suelta aquí para añadir a esta playlist</div>
+    </section>
+
+    <!-- Cola -->
+    <section class="panel" id="panel-queue">
+      <div class="list-head">
+        <span class="count" id="queue-count">0 en cola</span>
+        <button class="btn small danger-soft" id="btn-clear-queue">Limpiar</button>
+      </div>
+      <ul class="track-list" id="queue-list"></ul>
+      <div class="empty" id="queue-empty">
+        <svg viewBox="0 0 24 24" class="empty-ico"><line x1="3" y1="6" x2="15" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/><path d="M18 9v9"/><circle cx="18" cy="19" r="2.5"/></svg>
+        <p>La cola está vacía</p>
+      </div>
+    </section>
+
+    <!-- Acerca de -->
+    <section class="panel" id="panel-about">
+      <div class="list-head">
+        <span class="count">Acerca de</span>
+      </div>
+      <div class="about">
+        <img class="about-icon" src="icons/icon-192.png" alt="Icono de Free Player" />
+        <h2 class="about-name">Free Player</h2>
+        <p class="about-ver">
+          <button class="about-ver-btn" id="about-version" title="Ver el registro de versiones">Versión 0.3-c (beta)</button>
+        </p>
+        <p class="about-creator">Creado por <b>Jean Carlos Delevoper</b></p>
+
+        <div class="about-actions">
+          <button class="btn" id="about-colors">🎨 Elegir color</button>
+          <button class="btn" id="about-settings">⚙ Ajustes</button>
+        </div>
+
+        <div class="set-group">
+          <h3 class="set-title">Formatos</h3>
+          <p class="muted small" id="about-formats"></p>
+        </div>
+
+        <div class="set-group">
+          <h3 class="set-title">Privacidad</h3>
+          <p class="muted small">Free Player funciona sin conexión. Tus canciones, playlists y carátulas se
+            guardan únicamente en este dispositivo: nada se sube a internet.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ====== DOCK: mini reproductor + navegación de 5 iconos ====== -->
+  <div class="dock" id="dock">
+
+    <!-- Reproductor en miniatura (barra compacta sobre la navegación) -->
+    <section class="mini" id="player" hidden>
+      <button class="mini-open" id="mini-open" aria-label="Abrir reproductor">
+        <span class="mini-art" id="mini-art">
+          <img class="art-img" id="mini-img" alt="" hidden />
+          <span class="art-letter" id="mini-letter">♪</span>
+        </span>
+        <span class="mini-meta">
+          <span class="mini-title" id="mini-title">Sin reproduciendo</span>
+          <span class="mini-sub" id="mini-artist">—</span>
+        </span>
+      </button>
+      <button class="mini-play" id="mini-play" aria-label="Reproducir">
+        <svg viewBox="0 0 24 24" class="ico-play"><polygon points="7 4 20 12 7 20"/></svg>
+        <svg viewBox="0 0 24 24" class="ico-pause"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <div class="mini-progress"><i id="mini-bar"></i></div>
+    </section>
+
+    <!-- Navegación inferior: 5 iconos (el activo, en color de acento) -->
+    <nav class="bottom-nav" id="bottom-nav" role="tablist">
+      <button class="nav-item active" data-tab="library" role="tab">
+        <svg viewBox="0 0 24 24"><path d="M9 18V6l10-2v12"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="16.5" cy="16" r="2.5"/></svg>
+        <span>Canciones</span>
+      </button>
+      <button class="nav-item" data-tab="favorites" role="tab">
+        <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+        <span>Favoritos</span>
+      </button>
+      <button class="nav-item" data-tab="playlists" role="tab">
+        <svg viewBox="0 0 24 24"><line x1="4" y1="7" x2="16" y2="7"/><line x1="4" y1="12" x2="16" y2="12"/><line x1="4" y1="17" x2="12" y2="17"/><circle cx="18" cy="16" r="3"/><path d="M21 16V7l-3 1"/></svg>
+        <span>Playlists</span>
+      </button>
+      <button class="nav-item" data-tab="queue" role="tab">
+        <svg viewBox="0 0 24 24"><line x1="3" y1="6" x2="15" y2="6"/><line x1="3" y1="12" x2="15" y2="12"/><line x1="3" y1="18" x2="11" y2="18"/><path d="M18 9v9"/><circle cx="18" cy="19" r="2.5"/></svg>
+        <span>Cola</span>
+      </button>
+      <button class="nav-item" data-tab="about" role="tab">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16.5"/><circle cx="12" cy="7.4" r="0.9" fill="currentColor" stroke="none"/></svg>
+        <span>Acerca de</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- ====== REPRODUCTOR A PANTALLA COMPLETA ====== -->
+  <section class="fs" id="fs-player" hidden>
+    <div class="fs-bg" id="fs-bg"></div>
+    <div class="fs-inner">
+
+    <div class="fs-art" id="player-art">
+      <img class="art-img" id="art-img" alt="" hidden />
+      <span class="art-letter" id="art-letter">♪</span>
+    </div>
+
+    <!-- Barra de progreso -->
+    <div class="progress-row">
+      <span class="time" id="time-current">0:00</span>
+      <input type="range" id="seek" min="0" max="1000" value="0" step="1" class="slider seek" aria-label="Progreso" />
+      <span class="time" id="time-total">0:00</span>
+    </div>
+
+    <!-- Información de la canción -->
+    <div class="fs-meta">
+      <div class="marquee" id="track-title">Sin reproduciendo</div>
+      <div class="sub" id="track-artist">—</div>
+      <div class="tech" id="track-tech">—</div>
+    </div>
+
+    <!-- Volumen y refuerzo, en el hueco central del reproductor -->
+    <div class="fs-mix">
+      <div class="fs-mix-row">
+        <svg viewBox="0 0 24 24" class="fs-mix-ico" aria-hidden="true"><polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"/><path d="M15.5 8.5a5 5 0 0 1 0 7"/><path d="M18.5 5.5a9 9 0 0 1 0 13"/></svg>
+        <input type="range" id="fs-vol" class="slider fs-mix-slider" min="0" max="100" step="1" value="100" aria-label="Volumen" />
+        <span class="fs-mix-val" id="fs-vol-val">100%</span>
+      </div>
+      <div class="fs-mix-row">
+        <span class="fs-mix-tag" aria-hidden="true">BOOST</span>
+        <input type="range" id="fs-boost" class="slider fs-mix-slider" min="100" max="200" step="5" value="100" aria-label="Refuerzo de sonido" />
+        <span class="fs-mix-val" id="fs-boost-val">100%</span>
+      </div>
+    </div>
+
+    <!-- Controles principales -->
+    <div class="controls">
+      <button class="icon-btn" id="btn-repeat" aria-label="Repetir" title="Repetir">
+        <svg viewBox="0 0 24 24"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 0 1 4-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 0 1-4 4H3"/></svg>
+        <span class="badge" id="repeat-badge" hidden>1</span>
+      </button>
+      <button class="icon-btn" id="btn-prev" aria-label="Anterior">
+        <svg viewBox="0 0 24 24"><polygon points="19 20 9 12 19 4"/><line x1="5" y1="19" x2="5" y2="5"/></svg>
+      </button>
+      <button class="play-btn" id="btn-play" aria-label="Reproducir">
+        <svg viewBox="0 0 24 24" class="ico-play"><polygon points="7 4 20 12 7 20"/></svg>
+        <svg viewBox="0 0 24 24" class="ico-pause"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-next" aria-label="Siguiente">
+        <svg viewBox="0 0 24 24"><polygon points="5 4 15 12 5 20"/><line x1="19" y1="5" x2="19" y2="19"/></svg>
+      </button>
+      <button class="icon-btn" id="btn-shuffle" aria-label="Aleatorio" title="Aleatorio">
+        <svg viewBox="0 0 24 24"><polyline points="16 3 21 3 21 8"/><line x1="4" y1="20" x2="21" y2="3"/><polyline points="21 16 21 21 16 21"/><line x1="15" y1="15" x2="21" y2="21"/><line x1="4" y1="4" x2="9" y2="9"/></svg>
+      </button>
+    </div>
+
+    <!-- Fila inferior: minimizar, sueño, cola, favorito, menú -->
+    <div class="fs-actions">
+      <button class="fs-act" id="fs-close" aria-label="Minimizar" title="Cerrar">
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+      <button class="fs-act" id="btn-sleep-2" aria-label="Temporizador de sueño" title="Temporizador de sueño">
+        <svg viewBox="0 0 24 24"><path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5z"/></svg>
+      </button>
+      <button class="fs-act" id="btn-fs-queue" aria-label="Cola de reproducción" title="Cola de reproducción">
+        <svg viewBox="0 0 24 24"><path d="M4 5.5A2.5 2.5 0 0 1 6.5 3h9A2.5 2.5 0 0 1 18 5.5v9.7a2 2 0 0 1-.6 1.4l-3.8 3.8A2 2 0 0 1 12.2 21H6.5A2.5 2.5 0 0 1 4 18.5z"/><line x1="7.5" y1="8" x2="14.5" y2="8"/><line x1="7.5" y1="11.5" x2="12" y2="11.5"/><path d="M18 12.5v5.2"/><circle cx="16.2" cy="18" r="1.8"/></svg>
+      </button>
+      <button class="fs-act fav" id="btn-fav" aria-label="Favorito" title="Favorito">
+        <svg viewBox="0 0 24 24"><path d="M20.8 4.6a5.5 5.5 0 0 0-7.8 0L12 5.7l-1-1a5.5 5.5 0 0 0-7.8 7.8l8.8 8.8 8.8-8.8a5.5 5.5 0 0 0 0-7.8z"/></svg>
+      </button>
+      <button class="fs-act" id="fs-menu" aria-label="Más opciones" title="Más">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+      </button>
+    </div>
+
+    </div><!-- /.fs-inner -->
+
+    <!-- ====== MENÚ DEL REPRODUCTOR (bottom sheet) ====== -->
+    <div class="fs-backdrop" id="fs-sheet-backdrop" hidden></div>
+    <div class="fs-sheet" id="fs-sheet" hidden>
+      <div class="sheet-grip"></div>
+      <div class="sheet-head">
+        <span class="sheet-title" id="sheet-title">Opciones del reproductor</span>
+        <button class="icon-btn" id="fs-sheet-close" aria-label="Cerrar menú">
+          <svg viewBox="0 0 24 24"><line x1="6" y1="6" x2="18" y2="18"/><line x1="18" y1="6" x2="6" y2="18"/></svg>
+        </button>
+      </div>
+
+      <div class="sheet-menu" id="sheet-menu">
+        <button class="sheet-item" data-menu="speed">⚡ Velocidad y tono</button>
+        <button class="sheet-item" data-menu="eq">🎚 Ecualizador con presets</button>
+        <button class="sheet-item" data-menu="queue">≡ Cola de reproducción</button>
+        <button class="sheet-item" data-menu="info">ⓘ Info del archivo</button>
+        <button class="sheet-item" data-menu="playlist">＋ Añadir a playlist</button>
+      </div>
+
+      <button class="adv-toggle" id="btn-adv-toggle" aria-expanded="false">
+        <span>Más controles</span>
+        <svg viewBox="0 0 24 24"><polyline points="6 9 12 15 18 9"/></svg>
+      </button>
+
+      <!-- Controles avanzados -->
+      <div class="advanced" id="advanced" hidden>
+        <div class="adv-grid">
+          <label class="adv-item" data-g="speed">
+            <span class="adv-label">Velocidad <b id="speed-val">1.00×</b></span>
+            <input type="range" id="speed" min="0.5" max="2" step="0.05" value="1" />
+          </label>
+          <label class="adv-item" data-g="speed">
+            <span class="adv-label">Tono <b id="pitch-val">0 st</b></span>
+            <input type="range" id="pitch" min="-12" max="12" step="1" value="0" />
+          </label>
+          <label class="adv-item" data-g="boost">
+            <span class="adv-label">Sound boost <b id="boost-val">100%</b></span>
+            <input type="range" id="boost" min="100" max="200" step="5" value="100" />
+          </label>
+          <label class="adv-item" data-g="boost">
+            <span class="adv-label">🔊 Volumen <b id="vol-val">100%</b></span>
+            <input type="range" id="vol" min="0" max="100" step="1" value="100" />
+          </label>
+          <label class="adv-item" data-g="eq">
+            <span class="adv-label">Ecualizador <b id="eq-val">Plano</b></span>
+            <select id="eq-preset">
+              <option value="flat">Plano</option>
+              <option value="bass">Grave</option>
+              <option value="vocal">Vocal</option>
+              <option value="treble">Agudo</option>
+              <option value="loud">Loud</option>
+            </select>
+          </label>
+          <label class="adv-item" data-g="eq">
+            <span class="adv-label">Crossfade <b id="crossfade-val">0 s</b></span>
+            <input type="range" id="crossfade" min="0" max="12" step="1" value="0" />
+          </label>
+        </div>
+        <div class="adv-actions">
+          <button class="btn ghost" id="btn-reset-audio">Restablecer 1.00× / 0 st</button>
+          <button class="btn ghost" id="btn-sleep">⏰ Temporizador</button>
+          <button class="btn ghost" id="btn-add-to-playlist">＋ A playlist</button>
+          <button class="btn ghost" id="btn-track-info">ⓘ Info</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====== INPUT OCULTOS ====== -->
+  <input type="file" id="file-input" accept="audio/*,.mp3,.m4a,.wav,.ogg,.flac,.aac,.opus,.wma,.aiff,.ac3,.ape,.wv,.tta,.mp2,.caf,.au,.voc,.3gp,.amr,.mka,.webm" multiple hidden />
+  <input type="file" id="dir-input" webkitdirectory directory multiple hidden />
+
+  <!-- ====== MENÚ CONTEXTUAL ====== -->
+  <div class="ctx-menu" id="ctx-menu" hidden>
+    <button class="ctx-item" data-action="fav">❤ Favorito</button>
+    <button class="ctx-item" data-action="play">▶ Reproducir ahora</button>
+    <button class="ctx-item" data-action="play-next">⏭ Poner como siguiente</button>
+    <button class="ctx-item" data-action="add-queue">≡ Añadir a la cola</button>
+    <button class="ctx-item" data-action="add-playlist">＋ Añadir a playlist</button>
+    <button class="ctx-item" data-action="info">ⓘ Info del archivo</button>
+    <div class="ctx-sep"></div>
+    <button class="ctx-item danger" data-action="remove">✕ Quitar de la lista</button>
+    <button class="ctx-item danger" data-action="delete">🗑 Eliminar de la biblioteca</button>
+  </div>
+
+  <!-- ====== MODALES ====== -->
+  <div class="modal-backdrop" id="modal-backdrop" hidden>
+
+    <!-- Nueva playlist -->
+    <div class="modal" id="modal-new-playlist" hidden>
+      <h2>Nueva playlist</h2>
+      <input type="text" id="new-playlist-name" placeholder="Nombre de la playlist" maxlength="60" />
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cancelar</button>
+        <button class="btn primary" id="btn-create-playlist">Crear</button>
+      </div>
+    </div>
+
+    <!-- Elegir playlist -->
+    <div class="modal" id="modal-pick-playlist" hidden>
+      <h2>Añadir a playlist</h2>
+      <ul class="pick-list" id="pick-list"></ul>
+      <button class="btn ghost full" id="btn-pick-new">+ Nueva playlist</button>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Info del archivo -->
+    <div class="modal" id="modal-info" hidden>
+      <h2>Información</h2>
+      <dl class="info-list" id="info-list"></dl>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Registro de versiones (se abre tocando la versión en "Acerca de") -->
+    <div class="modal" id="modal-changelog" hidden>
+      <h2>Registro de versiones</h2>
+      <div class="changelog" id="changelog-list"></div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Temporizador de sueño -->
+    <div class="modal" id="modal-sleep" hidden>
+      <h2>Temporizador de sueño</h2>
+      <div class="sleep-grid">
+        <button class="btn ghost" data-sleep="15">15 min</button>
+        <button class="btn ghost" data-sleep="30">30 min</button>
+        <button class="btn ghost" data-sleep="45">45 min</button>
+        <button class="btn ghost" data-sleep="60">60 min</button>
+        <button class="btn ghost" data-sleep="end">Al final de la pista</button>
+        <button class="btn ghost danger" data-sleep="off">Desactivar</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Confirmar borrado -->
+    <div class="modal" id="modal-confirm" hidden>
+      <h2 id="confirm-title">¿Estás seguro?</h2>
+      <p class="confirm-text" id="confirm-text"></p>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cancelar</button>
+        <button class="btn danger" id="btn-confirm-ok">Eliminar</button>
+      </div>
+    </div>
+
+    <!-- Ajustes (antes era una pestaña de abajo) -->
+    <div class="modal" id="modal-settings" hidden>
+      <h2>Ajustes</h2>
+      <div class="settings">
+        <div class="set-group">
+          <h3 class="set-title">Tema</h3>
+          <div class="seg" id="theme-seg">
+            <button data-theme-set="light">Claro</button>
+            <button data-theme-set="dark">Oscuro</button>
+            <button data-theme-set="auto">Automático</button>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <h3 class="set-title">Color</h3>
+          <div class="set-row">
+            <span>Color de la interfaz</span>
+            <button class="btn small" id="set-colors">🎨 Elegir</button>
+          </div>
+          <div class="set-row">
+            <span>Temporizador de sueño</span>
+            <button class="btn small" id="set-sleep">⏰ Ajustar</button>
+          </div>
+          <div class="set-row">
+            <span>Canciones en la biblioteca</span>
+            <span class="set-val" id="set-lib-size">0</span>
+          </div>
+          <div class="set-row">
+            <span>Favoritas marcadas</span>
+            <span class="set-val" id="set-fav-size">0</span>
+          </div>
+        </div>
+
+        <div class="set-group">
+          <h3 class="set-title">Formatos</h3>
+          <p class="muted small" id="settings-formats"></p>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Colores del tema -->
+    <div class="modal" id="modal-colors" hidden>
+      <h2>Color del tema</h2>
+      <p class="confirm-text" style="margin-bottom:14px">Elige el color de acento de la interfaz.</p>
+      <div class="color-grid" id="color-grid"></div>
+      <div class="modal-actions">
+        <button class="btn ghost" data-close>Cerrar</button>
+      </div>
+    </div>
+
+    <!-- Escaneo del dispositivo -->
+    <div class="modal" id="modal-scan" hidden>
+      <h2 id="scan-title">Escaneando tu teléfono</h2>
+      <p class="confirm-text" id="scan-text">Buscando todas las canciones…</p>
+      <div class="scan-bar"><i id="scan-bar"></i></div>
+      <p class="muted small" id="scan-count">&nbsp;</p>
+      <div class="modal-actions">
+        <button class="btn ghost" id="btn-scan-cancel">Cancelar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ====== AVISO ====== -->
+  <div class="toast" id="toast" hidden></div>
+
+  <!-- Diagnóstico de errores (invisible, útil en pruebas headless) -->
+  <div id="errlog" hidden></div>
+
+  <!-- ====== DROP ZONE GLOBAL ====== -->
+  <div class="dropzone" id="dropzone" hidden>
+    <div class="dropzone-inner">
+      <svg viewBox="0 0 24 24"><path d="M12 16V4"/><polyline points="7 9 12 4 17 9"/><path d="M4 20h16"/></svg>
+      <p>Suelta tus archivos de audio aquí</p>
+      <p class="muted small" id="dropzone-formats"></p>
+    </div>
+  </div>
+
+  <script type="module" src="js/app.js"></script>
+  <script type="module">
+    // Auto-prueba de UI (?selftest=1) — no afecta al uso normal
+    if (new URLSearchParams(location.search).has('selftest') ||
+        new URLSearchParams(location.search).has('fmt') ||
+        new URLSearchParams(location.search).has('art') ||
+        new URLSearchParams(location.search).has('seed')) {
+      import('./js/selftest.js').catch((e) => {
+        fetch(location.origin + '/__log', {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ t: Date.now(), kind: 'SELFTEST-LOAD-ERR', msg: String(e) }),
+        }).catch(() => {});
+      });
+    }
+  </script>
+  <script>
+    // Recogida de errores de carga/ejecución -> servidor (diagnóstico remoto)
+    window.__errs = [];
+    (function () {
+      var ENDPOINT = location.origin + '/__log';
+      function post(obj) {
+        try {
+          fetch(ENDPOINT, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(obj),
+          }).catch(function () {});
+        } catch (e) {}
+      }
+      function log(kind, msg, extra) {
+        var line = kind + ': ' + msg;
+        window.__errs.push(line);
+        if (window.__errs.length > 40) window.__errs.shift();
+        // El resumen queda SOLO como diagnóstico (no se pinta en pantalla:
+        // antes tapaba la lista de canciones con un muro de texto).
+        var d = document.getElementById('errlog');
+        if (d) d.textContent = window.__errs.join(' ||| ');
+        post({ t: Date.now(), kind: kind, msg: String(msg), extra: extra || '' });
+      }
+
+      window.addEventListener('error', function (e) {
+        log('ERR', (e.message || e.error || 'error'), (e.filename || '') + ':' + (e.lineno || ''));
+      }, true);
+
+      window.addEventListener('unhandledrejection', function (e) {
+        var r = e.reason;
+        log('REJ', (r && (r.stack || r.message)) || r);
+      });
+
+      // capturar console.error
+      var origError = console.error;
+      console.error = function () {
+        log('CONSOLE', Array.prototype.map.call(arguments, function (a) {
+          return (a && (a.stack || a.message)) || String(a);
+        }).join(' '));
+        origError.apply(console, arguments);
+      };
+
+      // instantánea del estado de la UI tras el arranque
+      setTimeout(function () {
+        function vis(id) { var el = document.getElementById(id); return el ? !el.hidden : null; }
+        post({
+          t: Date.now(),
+          kind: 'SNAPSHOT',
+          msg: 'estado de la UI',
+          extra: JSON.stringify({
+            title: document.title,
+            tabs: document.querySelectorAll('.nav-item').length,
+            navActive: (document.querySelector('.nav-item.active') || {}).dataset?.tab,
+            libEmpty: vis('library-empty'),
+            libCount: (document.getElementById('lib-count') || {}).textContent,
+            plCount: (document.getElementById('pl-count') || {}).textContent,
+            queueCount: (document.getElementById('queue-count') || {}).textContent,
+            playerHidden: vis('player'),
+            theme: document.body.dataset.theme,
+            scanBtn: !!document.getElementById('btn-scan'),
+            accent: document.body.dataset.accent || 'indigo',
+            advHidden: vis('advanced'),
+            speed: (document.getElementById('speed-val') || {}).textContent,
+            pitch: (document.getElementById('pitch-val') || {}).textContent,
+            bodyBg: getComputedStyle(document.body).backgroundColor,
+            hOverflow: document.documentElement.scrollWidth > window.innerWidth + 1,
+            scrollH: document.documentElement.scrollHeight,
+          }),
+        });
+      }, 3500);
+    })();
+
+    // Service worker (solo sobre http/https o localhost)
+    if ('serviceWorker' in navigator && location.protocol.startsWith('http')) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js?v=20', { updateViaCache: 'none' }).catch(() => {});
+      });
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,16 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">Free Player</string>
+    <string name="title_activity_main">Free Player</string>
+    <string name="package_name">com.freeplayer.app</string>
+    <string name="custom_url_scheme">com.freeplayer.app</string>
+
+    <!-- MediaBridge: notificación de reproducción y widget -->
+    <string name="fp_channel_name">Reproducción de música</string>
+    <string name="fp_widget_label">Free Player</string>
+    <string name="fp_widget_idle">Sin reproducción</string>
+    <string name="fp_widget_description">Control de reproducción de Free Player</string>
+    <string name="fp_desc_prev">Anterior</string>
+    <string name="fp_desc_play">Reproducir o pausar</string>
+    <string name="fp_desc_next">Siguiente</string>
+</resources>

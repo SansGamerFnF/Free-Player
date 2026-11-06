@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Fondo de la carátula del widget: esquinas redondeadas (con clipToOutline
+     el contenido del ImageView se recorta a esta forma) -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <solid android:color="@color/fp_widget_art_bg" />
+    <corners android:radius="14dp" />
+</shape>

@@ -1,0 +1,16 @@
+{
+  "name": "free-player",
+  "version": "1.0.0",
+  "description": "Reproductor de música minimalista (PWA -> APK)",
+  "type": "module",
+  "scripts": {
+    "start": "node server.mjs 8087",
+    "test": "node test-audio.mjs"
+  },
+  "license": "MIT",
+  "dependencies": {
+    "@capacitor/android": "^8.5.3",
+    "@capacitor/cli": "^8.5.3",
+    "@capacitor/core": "^8.5.3"
+  }
+}

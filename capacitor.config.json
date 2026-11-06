@@ -1,0 +1,14 @@
+{
+  "appId": "com.freeplayer.app",
+  "appName": "Free Player",
+  "webDir": "www",
+  "backgroundColor": "#fafafa",
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": false,
+    "webContentsDebuggingEnabled": false
+  },
+  "server": {
+    "androidScheme": "https"
+  }
+}

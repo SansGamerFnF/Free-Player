@@ -1,0 +1,30 @@
+# Dependencias
+node_modules/
+
+# Carpeta generada para el APK (se regenera con: node build-www.mjs)
+www/
+
+# Registros de pruebas / basura local
+test-samples/
+test-log.ndjson
+*.log
+zen.log
+zen.err
+_probe*.mjs
+test-audio.mjs
+test-browser.mjs
+_*.mjs
+DS_Store
+Thumbs.db
+
+# Android (sí se sube el código fuente, pero no las build intermediarias)
+android/.gradle/
+android/build/
+android/app/build/
+android/app/src/main/assets/public/
+android/local.properties
+android/.idea/
+*.iml
+
+# Capacitor
+ios/

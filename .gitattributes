@@ -1,0 +1,20 @@
+# Normaliza finales de línea en el repo
+* text=auto
+
+# Scripts de Windows
+*.bat text eol=crlf
+*.cmd text eol=crlf
+*.ps1 text eol=crlf
+
+# Scripts de Unix (Gradle)
+gradlew text eol=lf
+
+# Binarios
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.ico binary
+*.wasm binary
+*.jar binary
+*.apk binary
